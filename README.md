@@ -8,5 +8,5 @@ Projekt przygotowywany w ramach przedmiotu Projekt Zespołowy 2 na kierunku Info
     - [Opis Projektu](docs/OpisProjektu.pdf)
 
 ### Etap 1 (13.11.2018r.)
- - [ ] Specyfikacja wymagań
- - [ ] Harmonogram działań
+ - [x] [Specyfikacja wymagań](docs/smartHome_poprawka_olek.odt)
+ - [x] [Harmonogram działań](docs/smartHome_poprawka_olek.odt)
