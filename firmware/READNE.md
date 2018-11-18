@@ -11,6 +11,6 @@ Prosty firmware do przełacznika Sonoff basic.
 3. Wyłącza przekaźnik
 
 ### Do zrobienia
-- [] Dodanie opisu flashowania przełącznika
-- [] Dodanie prostego interfejsu do konfigurowania sieci WiFi
+- [ ] Dodanie opisu flashowania przełącznika
+- [ ] Dodanie prostego interfejsu do konfigurowania sieci WiFi
     
