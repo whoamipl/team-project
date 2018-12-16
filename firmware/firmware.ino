@@ -1,19 +1,19 @@
-
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 
+// This header is not attached to repo, also is added to .gitgnore.
+// Setup it with your web credentials.
+#include "credentials.h"
 MDNSResponder mdns;
-
-// Replace with your network credentials
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-
 ESP8266WebServer server(80);
 
 String web_on_html = "{\"status\": \"on\"}";
-String web_off_html = "{\"status\": \"on\"}";
+String web_off_html = "{\"status\": \"off\"}";
+
+char* www_username = "TheBestTeam";
+char* www_password = "WiesioKiller";
 
 int gpio_13_led = 13;
 int gpio_12_relay = 12;
@@ -32,15 +32,10 @@ void setup(void){
   WiFi.begin(ssid, password);
   Serial.println("Connecting to wifi..");
 
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    digitalWrite(gpio_13_led, LOW);
-    delay(500);
-    Serial.print(".");
-    Serial.println(WiFi.localIP());
-    Serial.println(WiFi.status());
-    digitalWrite(gpio_13_led, HIGH);
-    delay(500);
+  if (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    Serial.println("WiFi Connect Failed! Rebooting...");
+    delay(1000);
+    ESP.restart();
   }
   
   Serial.println("");
@@ -54,6 +49,9 @@ void setup(void){
   }
   
   server.on("/", [](){
+    if (!server.authenticate(www_username, www_password)) {
+      return server.requestAuthentication();
+    }
     if(digitalRead(gpio_12_relay)==HIGH) {
       server.send(200, "text/html", web_on_html);
     } else {
@@ -62,6 +60,9 @@ void setup(void){
   });
   
   server.on("/on", [](){
+    if (!server.authenticate(www_username, www_password)) {
+      return server.requestAuthentication();
+    }
     server.send(200, "text/html", web_on_html);
     digitalWrite(gpio_13_led, LOW);
     digitalWrite(gpio_12_relay, HIGH);
@@ -69,6 +70,9 @@ void setup(void){
   });
   
   server.on("/off", [](){
+    if (!server.authenticate(www_username, www_password)) {
+      return server.requestAuthentication();
+    }
     server.send(200, "text/html", web_off_html);
     digitalWrite(gpio_13_led, HIGH);
     digitalWrite(gpio_12_relay, LOW);
@@ -81,4 +85,4 @@ void setup(void){
  
 void loop(void){
   server.handleClient();
-} 
+}
