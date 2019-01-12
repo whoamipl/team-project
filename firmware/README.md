@@ -12,7 +12,10 @@ Prosty firmware do przełacznika Sonoff basic, wraz z podstawową autoryzacją (
     2. {IP}/on
     3. {IP}/of
     
-1. Zwraca status urządenia.
+1. Zwraca status urządenia poniższej postaci.
+
+    `{"status": "on"}`
+
 2. Włącza przekaźnik
 3. Wyłącza przekaźnik
 
