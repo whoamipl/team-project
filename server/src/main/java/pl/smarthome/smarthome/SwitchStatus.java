@@ -1,6 +1,8 @@
 package pl.smarthome.smarthome;
 
 public class SwitchStatus {
+    private String status;
+
     public String getStatus() {
         return status;
     }
@@ -8,7 +10,5 @@ public class SwitchStatus {
     public void setStatus(String status) {
         this.status = status;
     }
-
-    private String status;
 
 }
