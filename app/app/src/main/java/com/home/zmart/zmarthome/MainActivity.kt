@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         val stringRequest = object : StringRequest(Method.GET, url,
                 Response.Listener { response ->
                     logResponse(response)
+                    textView_status.text = ""
                     statusValue = response.toString()
                 },
 
@@ -84,9 +85,8 @@ class MainActivity : AppCompatActivity() {
                     statusValue = response.toString()
                     setStatus()
                 },
-
                 Response.ErrorListener { error ->
-                    textView_status.text = "ERROR: ${error.toString()}"
+                    textView_status.text = "Server is not responding..."
                 })
         {
             @Throws(AuthFailureError::class)
@@ -115,11 +115,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setStatus() {
         if (statusValue.equals("on")) {
-            textView_status.text = statusValue
             button.setImageResource(R.drawable.button_off)
 
         } else {
-            textView_status.text = statusValue
             button.setImageResource(R.drawable.button_on)
         }
     }
