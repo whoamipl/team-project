@@ -18,7 +18,7 @@ import org.json.JSONObject
 class MainActivity : AppCompatActivity() {
 //    val client = OkHttpClient()
     private var handler: Handler? = null
-    val url = "http://192.168.0.15:8082/status"
+    val url = "http://192.168.0.15:8082"
     var queue: RequestQueue? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         queue = Volley.newRequestQueue(this)
         handler = Handler()
 
-        handler!!.postDelayed(makeToast, 1500)
+        handler!!.postDelayed(makeToast, 1800)
 
 
         setButtonListener(url)
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     private val makeToast = object : Runnable {
         override fun run(){
             toast("Test toast")
-            sendRequestAboutStatus(url)
+            sendRequestAboutStatus(url+"/status")
             handler!!.postDelayed(this, 1000)
 
         }
@@ -46,8 +46,38 @@ class MainActivity : AppCompatActivity() {
 
     private fun setButtonListener(url: String) {
         button.setOnClickListener {
-            sendRequestAboutStatus(url)
+            toggle(url+"/toggle")
         }
+    }
+
+    private fun toggle(url: String) {
+        val stringRequest = object : StringRequest(Method.GET, url,
+                Response.Listener { response ->
+                    Log.d("A", "Response is: " + response)
+                    var strResp = response.toString()
+                    textView_status.text = strResp
+                    if(strResp.equals("on")) {
+                        button.text = "Turn off"
+                    }else{
+                        button.text = "Turn on"
+
+                    }
+                },
+                Response.ErrorListener { error ->
+
+                    textView_status.text = "ERROR: %s".format(error.toString())
+                }) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                val credentials = "TheBestTeam:WiesioKiller"
+                val auth = "Basic " + Base64.encodeToString(credentials.toByteArray(), NO_WRAP)
+                headers.put("Content-Type", "application/json")
+                headers.put("Authorization", auth)
+                return headers
+            }
+        }
+        queue!!.add(stringRequest)
     }
 
     private fun sendRequestAboutStatus(url: String) {
