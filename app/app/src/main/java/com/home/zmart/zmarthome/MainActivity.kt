@@ -3,6 +3,7 @@ package com.home.zmart.zmarthome
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.os.SystemClock
 import android.util.Base64
 import android.util.Log
 import com.android.volley.toolbox.StringRequest
@@ -10,7 +11,6 @@ import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_main.*
 import android.util.Base64.NO_WRAP
 import com.android.volley.*
-import org.jetbrains.anko.toast
 
 
 class MainActivity : AppCompatActivity() {
@@ -20,21 +20,21 @@ class MainActivity : AppCompatActivity() {
     val username = "TheBestTeam"
     val password = "WiesioKiller"
     var queue: RequestQueue? = null
+    var statusValue = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         queue = Volley.newRequestQueue(this)
         handler = Handler()
 
-        handler!!.postDelayed(makeToast, 1800)
+        handler!!.postDelayed(checkStatus, 1800)
 
 
         setButtonListener(url)
     }
 
-    private val makeToast = object : Runnable {
+    private val checkStatus = object : Runnable {
         override fun run() {
-            toast("Test toast ")
             sendRequestAboutStatus(url + "/status")
             handler!!.postDelayed(this, 1000)
 
@@ -43,16 +43,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun setButtonListener(url: String) {
         button.setOnClickListener {
+            setStatus()
+
             toggle(url + "/toggle")
         }
     }
 
     private fun toggle(url: String) {
+
+
         val stringRequest = object : StringRequest(Method.GET, url,
                 Response.Listener { response ->
                     logResponse(response)
-                    var strResp = response.toString()
-                    setStatus(strResp)
+                    statusValue = response.toString()
+                    //setStatus()
                 },
 
                 Response.ErrorListener { error ->
@@ -80,8 +84,8 @@ class MainActivity : AppCompatActivity() {
         val stringRequest = object : StringRequest(Method.GET, url,
                 Response.Listener { response ->
                     logResponse(response)
-                    val strResp = response.toString()
-                    setStatus(strResp)
+                    statusValue = response.toString()
+                    setStatus()
                 },
 
                 Response.ErrorListener { error ->
@@ -100,11 +104,16 @@ class MainActivity : AppCompatActivity() {
         Log.d("RESPONSE", "Response is: " + response)
     }
 
-    private fun setStatus(strResp: String) {
-        if (strResp.equals("on")) {
-            button.text = "Turn off"
+    private fun setStatus() {
+        if (statusValue.equals("on")) {
+            textView_status.text = statusValue
+            button.setImageResource(R.drawable.button_off)
+
         } else {
-            button.text = "Turn on"
+            textView_status.text = statusValue
+            button.setImageResource(R.drawable.button_on)
+
         }
     }
+
 }
