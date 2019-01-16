@@ -11,16 +11,15 @@ import kotlinx.android.synthetic.main.activity_main.*
 import android.util.Base64.NO_WRAP
 import com.android.volley.*
 import org.jetbrains.anko.toast
-import org.json.JSONArray
-import org.json.JSONObject
 
 
 class MainActivity : AppCompatActivity() {
-//    val client = OkHttpClient()
+    //    val client = OkHttpClient()
     private var handler: Handler? = null
     val url = "http://192.168.0.15:8082"
+    val username = "TheBestTeam"
+    val password = "WiesioKiller"
     var queue: RequestQueue? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -34,82 +33,78 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val makeToast = object : Runnable {
-        override fun run(){
-            toast("Test toast")
-            sendRequestAboutStatus(url+"/status")
+        override fun run() {
+            toast("Test toast ")
+            sendRequestAboutStatus(url + "/status")
             handler!!.postDelayed(this, 1000)
 
         }
     }
 
-
-
     private fun setButtonListener(url: String) {
         button.setOnClickListener {
-            toggle(url+"/toggle")
+            toggle(url + "/toggle")
         }
     }
 
     private fun toggle(url: String) {
         val stringRequest = object : StringRequest(Method.GET, url,
                 Response.Listener { response ->
-                    Log.d("A", "Response is: " + response)
+                    logResponse(response)
                     var strResp = response.toString()
-                    textView_status.text = strResp
-                    if(strResp.equals("on")) {
-                        button.text = "Turn off"
-                    }else{
-                        button.text = "Turn on"
-
-                    }
+                    setStatus(strResp)
                 },
-                Response.ErrorListener { error ->
 
-                    textView_status.text = "ERROR: %s".format(error.toString())
-                }) {
+                Response.ErrorListener { error ->
+                    textView_status.text = "ERROR: "+ error.toString()
+                })
+        {
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                val credentials = "TheBestTeam:WiesioKiller"
-                val auth = "Basic " + Base64.encodeToString(credentials.toByteArray(), NO_WRAP)
-                headers.put("Content-Type", "application/json")
-                headers.put("Authorization", auth)
-                return headers
+                return setHeaders()
             }
         }
         queue!!.add(stringRequest)
     }
 
+    private fun setHeaders(): HashMap<String, String> {
+        val headers = HashMap<String, String>()
+        val credentials = "$username:$password"
+        val auth = "Basic " + Base64.encodeToString(credentials.toByteArray(), NO_WRAP)
+        headers.put("Content-Type", "application/json")
+        headers.put("Authorization", auth)
+        return headers
+    }
+
     private fun sendRequestAboutStatus(url: String) {
         val stringRequest = object : StringRequest(Method.GET, url,
                 Response.Listener { response ->
-
-                    Log.d("A", "Response is: " + response)
-                    var strResp = response.toString()
-                   // val jsonObj: JSONObject = JSONObject(strResp)
-                    //var res = jsonObj.get("status")
-                    textView_status.text = strResp
-                    if(strResp.equals("on")) {
-                        button.text = "Turn off"
-                    }else{
-                        button.text = "Turn on"
-
-                    }
+                    logResponse(response)
+                    val strResp = response.toString()
+                    setStatus(strResp)
                 },
-                Response.ErrorListener { error ->
 
-                    textView_status.text = "ERROR: %s".format(error.toString())
-                }) {
+                Response.ErrorListener { error ->
+                    textView_status.text = "ERROR: ${error.toString()}"
+                })
+        {
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                val credentials = "TheBestTeam:WiesioKiller"
-                val auth = "Basic " + Base64.encodeToString(credentials.toByteArray(), NO_WRAP)
-                headers.put("Content-Type", "application/json")
-                headers.put("Authorization", auth)
-                return headers
+                return setHeaders()
             }
         }
         queue!!.add(stringRequest)
+    }
+
+    private fun logResponse(response: String?) {
+        Log.d("RESPONSE", "Response is: " + response)
+    }
+
+    private fun setStatus(strResp: String) {
+        if (strResp.equals("on")) {
+            button.text = "Turn off"
+        } else {
+            button.text = "Turn on"
+        }
     }
 }
