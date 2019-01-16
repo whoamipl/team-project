@@ -59,6 +59,12 @@ class MainActivity : AppCompatActivity() {
                    // val jsonObj: JSONObject = JSONObject(strResp)
                     //var res = jsonObj.get("status")
                     textView_status.text = strResp
+                    if(strResp.equals("on")) {
+                        button.text = "Turn off"
+                    }else{
+                        button.text = "Turn on"
+
+                    }
                 },
                 Response.ErrorListener { error ->
 
