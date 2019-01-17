@@ -14,37 +14,44 @@ import java.util.Base64;
 
 @RestController
 public class SmarthomeController {
-    private final static String baseSwitchUrl = "http://192.168.0.15:8081";
-    private final static String switchCredentials = "TheBestTeam:WiesioKiller";
+    private final String baseSwitchUrl = "http://192.168.0.15:8081";
+    private final String switchCredentials = "TheBestTeam:WiesioKiller";
     private static SwitchStatus status = new SwitchStatus();
-    String encodedCredentials = Base64.getEncoder().encodeToString(switchCredentials.getBytes(StandardCharsets.UTF_8));
+    private String encodedCredentials = Base64.getEncoder().encodeToString(switchCredentials.getBytes(StandardCharsets.UTF_8));
 
     @GetMapping("/toggle")
     public String changeSwitchStatus() throws IOException {
-        status.setStatus(getStatus("/status"));
+        status.setStatus(sendRequestToSonof("/status"));
 
         if (status.getStatus().equals("off")) {
-            return getStatus("/on");
+            return sendRequestToSonof("/on");
 
         } else {
-            return getStatus("/off");
+            return sendRequestToSonof("/off");
         }
     }
 
     @GetMapping("/status")
     public String getSwitchStatus() throws IOException {
 
-        return getStatus("/status");
+        return sendRequestToSonof("/status");
     }
 
-    private String getStatus(String s) throws IOException {
+    private String sendRequestToSonof(String s) throws IOException {
         URL url = new URL(baseSwitchUrl + s);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Authorization", "Basic " + encodedCredentials);
         con.setRequestMethod("GET");
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            status.setStatus("error");
+            return status.getStatus();
+        }
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        var response = new StringBuffer();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
