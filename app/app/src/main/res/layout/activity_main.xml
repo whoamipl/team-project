@@ -12,16 +12,6 @@
         android:layout_height="match_parent"
         android:background="@color/grey">
 
-        <ImageButton
-            android:id="@+id/button"
-            android:layout_width="250sp"
-            android:layout_height="250sp"
-            android:layout_centerInParent="true"
-            android:visibility="invisible"
-            android:background="@drawable/button_off"
-            android:scaleType="fitXY"
-            android:text="Turn off" />
-
         <TextView
             android:id="@+id/textView_status"
             android:layout_width="fill_parent"
@@ -32,6 +22,24 @@
             android:layout_marginTop="43dp"
             android:text=""
             android:textColor="@color/colorPrimary" />
+
+        <ImageButton
+            android:id="@+id/button"
+            android:layout_width="250sp"
+            android:layout_height="250sp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/button_off"
+            android:scaleType="fitXY"
+            android:text="Turn off"
+             />
+
+        <ImageButton
+            android:id="@+id/buttonSettings"
+            android:layout_width="35sp"
+            android:layout_height="35sp"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/gear"
+            android:text="Button" />
 
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

@@ -12,14 +12,19 @@ import android.util.Base64.NO_WRAP
 import com.android.volley.*
 import android.graphics.drawable.TransitionDrawable
 import android.graphics.drawable.ColorDrawable
+import android.support.v7.app.AlertDialog
+import android.text.InputType
 import android.view.View
 import android.view.animation.AlphaAnimation
+import android.widget.EditText
+import android.widget.LinearLayout
+
 
 class MainActivity : AppCompatActivity() {
     private var handler: Handler? = null
     val url = "http://192.168.0.15:8082"
-    val username = "TheBestTeam"
-    val password = "WiesioKiller"
+    var username = ""
+    var password = ""
     var queue: RequestQueue? = null
     var statusValue = ""
     var isRunFirstTime = true
@@ -31,8 +36,51 @@ class MainActivity : AppCompatActivity() {
         handler = Handler()
         handler!!.postDelayed(checkStatus, 0)
 
-
+        displayAlert()
         setButtonListener(url)
+        setButtonSettingsListener()
+
+
+    }
+
+    fun displayAlert() {
+        val alert = AlertDialog.Builder(this)
+        var loginText: EditText? = null
+        var passwordText: EditText? = null
+
+        // Builder
+        with(alert) {
+            setTitle("Fill cridentials to gain access")
+
+            loginText = EditText(context)
+            loginText!!.hint = "login"
+            loginText!!.inputType = InputType.TYPE_CLASS_TEXT
+
+            passwordText = EditText(context)
+            passwordText!!.hint = "password"
+            passwordText!!.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+
+            setPositiveButton("Save") { dialog, whichButton ->
+                username = loginText!!.text.toString()
+                password = passwordText!!.text.toString()
+                dialog.dismiss()
+            }
+            if (!isRunFirstTime) {
+                setNegativeButton("Cancel") { dialog, whichButton ->
+                    dialog.dismiss()
+                }
+            }
+        }
+
+        // Dialog
+        val dialog = alert.create()
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+        layout.addView(loginText)
+        layout.addView(passwordText)
+
+        dialog.setView(layout)
+        dialog.show()
     }
 
     private val checkStatus = object : Runnable {
@@ -49,6 +97,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setButtonSettingsListener() {
+        buttonSettings.setOnClickListener {
+           displayAlert()
+        }
+    }
+
     private fun toggle(url: String) {
         val stringRequest = object : StringRequest(Method.GET, url,
                 Response.Listener { response ->
@@ -58,9 +112,8 @@ class MainActivity : AppCompatActivity() {
                 },
 
                 Response.ErrorListener { error ->
-                    textView_status.text = "ERROR: "+ error.toString()
-                })
-        {
+                    textView_status.text = "ERROR: " + error.toString()
+                }) {
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
                 return setHeaders()
@@ -82,7 +135,7 @@ class MainActivity : AppCompatActivity() {
         val stringRequest = object : StringRequest(Method.GET, url,
                 Response.Listener { response ->
                     logResponse(response)
-                    if(isRunFirstTime) {
+                    if (isRunFirstTime) {
                         animateVisibilityOfButton()
                         isRunFirstTime = false
                     }
@@ -92,8 +145,7 @@ class MainActivity : AppCompatActivity() {
                 },
                 Response.ErrorListener { error ->
                     textView_status.text = "Server is not responding..."
-                })
-        {
+                }) {
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
                 return setHeaders()
@@ -116,7 +168,7 @@ class MainActivity : AppCompatActivity() {
         pulse(this.getColor(R.color.white), this.getColor(R.color.grey))
     }
 
-    private fun pulse(color1: Int,color2: Int) {
+    private fun pulse(color1: Int, color2: Int) {
         var color = arrayOf(ColorDrawable(color1), ColorDrawable(color2))
         var trans = TransitionDrawable(color)
         layout.setBackground(trans)
@@ -132,11 +184,14 @@ class MainActivity : AppCompatActivity() {
             textView_status.text = ""
             button.setImageResource(R.drawable.button_off)
 
-        } else if(statusValue.equals("off")) {
+        } else if (statusValue.equals("off")) {
             textView_status.text = ""
             button.setImageResource(R.drawable.button_on)
-        }else{
-            textView_status.text = "Sonof is not responding..."
+        } else if(statusValue.equals("error 401")){
+            textView_status.text = "Authorization failed, check cridentials"
+        } else if(true){
+            textView_status.text = "Sonoff is not responding..."
+
 
         }
     }
