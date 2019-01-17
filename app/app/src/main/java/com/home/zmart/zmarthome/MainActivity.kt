@@ -115,9 +115,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun setStatus() {
         if (statusValue.equals("on")) {
+            textView_status.text = ""
             button.setImageResource(R.drawable.button_off)
 
         } else if(statusValue.equals("off")) {
+            textView_status.text = ""
             button.setImageResource(R.drawable.button_on)
         }else{
             textView_status.text = "Sonof is not responding..."
