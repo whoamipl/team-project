@@ -12,7 +12,8 @@ import android.util.Base64.NO_WRAP
 import com.android.volley.*
 import android.graphics.drawable.TransitionDrawable
 import android.graphics.drawable.ColorDrawable
-
+import android.view.View
+import android.view.animation.AlphaAnimation
 
 class MainActivity : AppCompatActivity() {
     private var handler: Handler? = null
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     val password = "WiesioKiller"
     var queue: RequestQueue? = null
     var statusValue = ""
+    var isRunFirstTime = true
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -80,7 +82,10 @@ class MainActivity : AppCompatActivity() {
         val stringRequest = object : StringRequest(Method.GET, url,
                 Response.Listener { response ->
                     logResponse(response)
-
+                    if(isRunFirstTime) {
+                        animateVisibilityOfButton()
+                        isRunFirstTime = false
+                    }
                     makePulseEffect()
                     statusValue = response.toString()
                     setStatus()
@@ -95,6 +100,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
         queue!!.add(stringRequest)
+    }
+
+    private fun animateVisibilityOfButton() {
+        val animation1 = AlphaAnimation(0.0f, 1f)
+        animation1.duration = 2000
+        animation1.startOffset = 350
+        animation1.fillAfter = true
+        button.visibility = View.VISIBLE
+        button.startAnimation(animation1)
     }
 
     private fun makePulseEffect() {

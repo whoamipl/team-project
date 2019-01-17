@@ -17,6 +17,7 @@
             android:layout_width="250sp"
             android:layout_height="250sp"
             android:layout_centerInParent="true"
+            android:visibility="invisible"
             android:background="@drawable/button_off"
             android:scaleType="fitXY"
             android:text="Turn off" />
