@@ -189,7 +189,7 @@ class MainActivity : AppCompatActivity() {
             button.setImageResource(R.drawable.button_on)
         } else if(statusValue.equals("error 401")){
             textView_status.text = "Authorization failed, check cridentials"
-        } else if(true){
+        } else if(statusValue.equals("error 501")){
             textView_status.text = "Sonoff is not responding..."
 
 
