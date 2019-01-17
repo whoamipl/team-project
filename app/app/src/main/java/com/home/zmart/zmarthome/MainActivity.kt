@@ -22,6 +22,8 @@ import android.widget.EditText
 import android.widget.LinearLayout
 
 
+
+
 class MainActivity : AppCompatActivity() {
     private var handler: Handler? = null
     val url = "http://192.168.0.15:8082"
@@ -73,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
             passwordText = EditText(context)
             passwordText!!.hint = "password"
-            passwordText!!.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+            passwordText!!.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
 
             setPositiveButton("Save") { dialog, whichButton ->
                 username = loginText!!.text.toString()
