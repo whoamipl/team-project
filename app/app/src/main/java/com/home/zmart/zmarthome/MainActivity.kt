@@ -28,17 +28,20 @@ class MainActivity : AppCompatActivity() {
     var queue: RequestQueue? = null
     var statusValue = ""
     var isRunFirstTime = true
+    var isCreditsFilledFirstTime = false
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        queue = Volley.newRequestQueue(this)
-        handler = Handler()
-        handler!!.postDelayed(checkStatus, 0)
-
-        displayAlert()
         setButtonListener(url)
         setButtonSettingsListener()
+        queue = Volley.newRequestQueue(this)
+        handler = Handler()
+
+        displayAlert()
+
+
+        handler!!.postDelayed(checkStatus, 0)
 
 
     }
@@ -63,6 +66,7 @@ class MainActivity : AppCompatActivity() {
             setPositiveButton("Save") { dialog, whichButton ->
                 username = loginText!!.text.toString()
                 password = passwordText!!.text.toString()
+                isCreditsFilledFirstTime = true
                 dialog.dismiss()
             }
             if (!isRunFirstTime) {
@@ -78,15 +82,18 @@ class MainActivity : AppCompatActivity() {
         layout.orientation = LinearLayout.VERTICAL
         layout.addView(loginText)
         layout.addView(passwordText)
-
+        dialog.setCancelable(false)
+        dialog.setCanceledOnTouchOutside(false)
         dialog.setView(layout)
         dialog.show()
     }
 
     private val checkStatus = object : Runnable {
         override fun run() {
-            sendRequestAboutStatus(url + "/status")
-            handler!!.postDelayed(this, 1500)
+            if (isCreditsFilledFirstTime) {
+                sendRequestAboutStatus(url + "/status")
+            }
+                handler!!.postDelayed(this, 1500)
 
         }
     }
@@ -99,7 +106,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setButtonSettingsListener() {
         buttonSettings.setOnClickListener {
-           displayAlert()
+            displayAlert()
         }
     }
 
@@ -187,9 +194,9 @@ class MainActivity : AppCompatActivity() {
         } else if (statusValue.equals("off")) {
             textView_status.text = ""
             button.setImageResource(R.drawable.button_on)
-        } else if(statusValue.equals("error 401")){
+        } else if (statusValue.equals("error 401")) {
             textView_status.text = "Authorization failed, check cridentials"
-        } else if(statusValue.equals("error 501")){
+        } else if (statusValue.equals("error 501")) {
             textView_status.text = "Sonoff is not responding..."
 
 
