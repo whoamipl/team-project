@@ -1,5 +1,7 @@
 package com.home.zmart.zmarthome
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -33,12 +35,22 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val sharedPref = this?.getPreferences(Context.MODE_PRIVATE)
+
         setButtonListener(url)
-        setButtonSettingsListener()
+        setButtonSettingsListener(sharedPref)
+
+        username = sharedPref.getString("username","")
+        password = sharedPref.getString("password","")
+
         queue = Volley.newRequestQueue(this)
         handler = Handler()
 
-        displayAlert()
+        if(!(username.isNotEmpty() && password.isNotEmpty())) {
+            displayAlert(sharedPref)
+        }else{
+            isCreditsFilledFirstTime = true
+        }
 
 
         handler!!.postDelayed(checkStatus, 0)
@@ -46,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun displayAlert() {
+    fun displayAlert(sharedPref: SharedPreferences) {
         val alert = AlertDialog.Builder(this)
         var loginText: EditText? = null
         var passwordText: EditText? = null
@@ -66,6 +78,11 @@ class MainActivity : AppCompatActivity() {
             setPositiveButton("Save") { dialog, whichButton ->
                 username = loginText!!.text.toString()
                 password = passwordText!!.text.toString()
+                with (sharedPref.edit()) {
+                    putString("username", username)
+                    putString("password",password)
+                    commit()
+                }
                 isCreditsFilledFirstTime = true
                 dialog.dismiss()
             }
@@ -104,9 +121,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setButtonSettingsListener() {
+    private fun setButtonSettingsListener(sharedPref: SharedPreferences) {
         buttonSettings.setOnClickListener {
-            displayAlert()
+            displayAlert(sharedPref)
         }
     }
 
@@ -142,16 +159,14 @@ class MainActivity : AppCompatActivity() {
         val stringRequest = object : StringRequest(Method.GET, url,
                 Response.Listener { response ->
                     logResponse(response)
-                    if (isRunFirstTime) {
-                        animateVisibilityOfButton()
-                        isRunFirstTime = false
-                    }
+                    animateShowingButton()
                     makePulseEffect()
                     statusValue = response.toString()
                     setStatus()
                 },
                 Response.ErrorListener { error ->
                     textView_status.text = "Server is not responding..."
+                    animateShowingButton()
                 }) {
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
@@ -159,6 +174,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
         queue!!.add(stringRequest)
+    }
+
+    private fun animateShowingButton() {
+        if (isRunFirstTime) {
+            animateVisibilityOfButton()
+            isRunFirstTime = false
+        }
     }
 
     private fun animateVisibilityOfButton() {
