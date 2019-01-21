@@ -39,7 +39,7 @@ void setup(void) {
   }
 
   Serial.println("");
-  Serial.print("Connected to ");
+  Serial.print("Connected to ");W
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());

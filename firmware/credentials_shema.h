@@ -1,3 +1,3 @@
 // Replace with your network credentials
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+const char* ssid = "zmarthome";
+const char* password = "wieso123";

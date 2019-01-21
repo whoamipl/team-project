@@ -16,12 +16,13 @@ import java.util.Base64;
 
 @RestController
 public class SmarthomeController {
-    private final String baseSwitchUrl = "http://192.168.0.15:8081";
+    private final String baseSwitchUrl = "http://192.168.0.100";
     private static SwitchStatus status = new SwitchStatus();
     private String encodedCredentials;
+
     @GetMapping("/toggle")
     public String changeSwitchStatus(@RequestHeader("Authorization") String auth) throws IOException {
-        status.setStatus(sendRequestToSonof("/status"));
+        status.setStatus(sendRequestToSonof("/"));
         encodedCredentials = auth;
 
         if (status.getStatus().equals("off")) {
@@ -35,7 +36,7 @@ public class SmarthomeController {
     @GetMapping("/status")
     public String getSwitchStatus(@RequestHeader("Authorization") String auth) throws IOException {
         encodedCredentials = auth;
-        return sendRequestToSonof("/status");
+        return sendRequestToSonof("/");
     }
 
     private String sendRequestToSonof(String s) throws IOException {
@@ -44,25 +45,33 @@ public class SmarthomeController {
         con.setRequestProperty("Authorization", encodedCredentials);
         con.setRequestMethod("GET");
         BufferedReader in = null;
+
         try {
             in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        } catch (ConnectException e) {
+        }
+        catch (ConnectException e) {
             System.out.println("error 501");
             status.setStatus("error 501");
             return status.getStatus();
-        } catch (IOException e){
+        }
+        catch (IOException e) {
             System.out.println("error " + con.getResponseCode());
-            status.setStatus("error "+con.getResponseCode());
+            status.setStatus("error " + con.getResponseCode());
             return status.getStatus();
         }
+
         String inputLine;
+
         var response = new StringBuffer();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
         }
+
         in.close();
+
         System.out.println(response);
+
         Gson g = new Gson();
         SwitchStatus p = g.fromJson(String.valueOf(response), SwitchStatus.class);
         return p.getStatus();

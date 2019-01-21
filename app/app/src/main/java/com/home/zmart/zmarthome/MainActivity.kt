@@ -26,7 +26,7 @@ import android.widget.LinearLayout
 
 class MainActivity : AppCompatActivity() {
     private var handler: Handler? = null
-    val url = "http://192.168.0.15:8082"
+    val url = "http://192.168.0.101:8082"
     var username = ""
     var password = ""
     var queue: RequestQueue? = null
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
             if (isCreditsFilledFirstTime) {
                 sendRequestAboutStatus(url + "/status")
             }
-                handler!!.postDelayed(this, 1500)
+                handler!!.postDelayed(this, 5000)
 
         }
     }
@@ -167,6 +167,7 @@ class MainActivity : AppCompatActivity() {
                     setStatus()
                 },
                 Response.ErrorListener { error ->
+                    Log.d("ERROR", error.toString())
                     textView_status.text = "Server is not responding..."
                     animateShowingButton()
                 }) {
