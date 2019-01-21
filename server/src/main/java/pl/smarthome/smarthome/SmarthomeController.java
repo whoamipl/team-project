@@ -3,6 +3,7 @@ package pl.smarthome.smarthome;
 import com.google.gson.Gson;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.BufferedReader;
@@ -13,28 +14,48 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Map;
 
 @RestController
 public class SmarthomeController {
-    private final String baseSwitchUrl = "http://192.168.0.100";
+    private final Map<String, String> baseSwitchUrls = Map
+            .of("FIRST", "http://192.168.0.101", "SECOND", "http://192.168.0.102");
+    private String baseSwitchUrl = "";
     private static SwitchStatus status = new SwitchStatus();
     private String encodedCredentials;
 
     @GetMapping("/toggle")
-    public String changeSwitchStatus(@RequestHeader("Authorization") String auth) throws IOException {
+    public String changeSwitchStatus(@RequestHeader("Authorization") String auth, @RequestParam(value="sw") String sw ) throws IOException {
+        System.out.println(sw);
+        if (sw.equals("FIRST")) {
+            baseSwitchUrl = baseSwitchUrls.get("FIRST");
+        }
+        else {
+            baseSwitchUrl = baseSwitchUrls.get("SECOND");
+        }
+
         status.setStatus(sendRequestToSonof("/"));
         encodedCredentials = auth;
 
         if (status.getStatus().equals("off")) {
             return sendRequestToSonof("/on");
 
-        } else {
+        }
+        else {
             return sendRequestToSonof("/off");
         }
     }
 
+
     @GetMapping("/status")
-    public String getSwitchStatus(@RequestHeader("Authorization") String auth) throws IOException {
+    public String getSwitchStatus(@RequestHeader("Authorization") String auth, @RequestParam(value="sw") String sw) throws IOException {
+        if (sw.equals("FIRST")) {
+            baseSwitchUrl = baseSwitchUrls.get("FIRST");
+        }
+        else {
+            baseSwitchUrl = baseSwitchUrls.get("SECOND");
+        }
+
         encodedCredentials = auth;
         return sendRequestToSonof("/");
     }

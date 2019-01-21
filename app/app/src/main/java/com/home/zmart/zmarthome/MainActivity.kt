@@ -26,20 +26,24 @@ import android.widget.LinearLayout
 
 class MainActivity : AppCompatActivity() {
     private var handler: Handler? = null
-    val url = "http://192.168.0.101:8082"
+    var selectedSwitch = "FIRST"
+    private var toggleUrl = "http://192.168.0.100:8082/toggle?sw=$selectedSwitch"
+    var statusUrl = "http://192.168.0.100:8082/status?sw=$selectedSwitch"
     var username = ""
     var password = ""
     var queue: RequestQueue? = null
     var statusValue = ""
     var isRunFirstTime = true
     var isCreditsFilledFirstTime = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val sharedPref = this?.getPreferences(Context.MODE_PRIVATE)
+        val sharedPref = this.getPreferences(Context.MODE_PRIVATE)
 
-        setButtonListener(url)
+        setToggleButtonListener()
+        setButtonListener()
         setButtonSettingsListener(sharedPref)
 
         username = sharedPref.getString("username","")
@@ -60,10 +64,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun displayAlert(sharedPref: SharedPreferences) {
+    private fun displayAlert(sharedPref: SharedPreferences) {
         val alert = AlertDialog.Builder(this)
-        var loginText: EditText? = null
-        var passwordText: EditText? = null
+        var loginText: EditText?
+        var passwordText: EditText?
 
         // Builder
         with(alert) {
@@ -110,16 +114,27 @@ class MainActivity : AppCompatActivity() {
     private val checkStatus = object : Runnable {
         override fun run() {
             if (isCreditsFilledFirstTime) {
-                sendRequestAboutStatus(url + "/status")
+                sendRequestAboutStatus(statusUrl)
             }
-                handler!!.postDelayed(this, 5000)
+                handler!!.postDelayed(this, 1500)
 
         }
     }
 
-    private fun setButtonListener(url: String) {
+    private fun setButtonListener() {
         button.setOnClickListener {
-            toggle(url + "/toggle")
+            toggle()
+        }
+    }
+
+    private fun setToggleButtonListener() {
+        toggleButton.setOnClickListener {
+            selectedSwitch = if (Integer.parseInt(toggleButton.text.toString()) == 1) {
+                "FIRST"
+            } else {
+                "SECOND"
+            }
+            updateUrls()
         }
     }
 
@@ -129,8 +144,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun toggle(url: String) {
-        val stringRequest = object : StringRequest(Method.GET, url,
+    private fun toggle() {
+        val stringRequest = object : StringRequest(Method.GET, toggleUrl,
                 Response.Listener { response ->
                     logResponse(response)
                     textView_status.text = ""
@@ -152,8 +167,8 @@ class MainActivity : AppCompatActivity() {
         val headers = HashMap<String, String>()
         val credentials = "$username:$password"
         val auth = "Basic " + Base64.encodeToString(credentials.toByteArray(), NO_WRAP)
-        headers.put("Content-Type", "application/json")
-        headers.put("Authorization", auth)
+        headers["Content-Type"] = "application/json"
+        headers["Authorization"] = auth
         return headers
     }
 
@@ -201,30 +216,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun pulse(color1: Int, color2: Int) {
-        var color = arrayOf(ColorDrawable(color1), ColorDrawable(color2))
-        var trans = TransitionDrawable(color)
-        layout.setBackground(trans)
+        val color = arrayOf(ColorDrawable(color1), ColorDrawable(color2))
+        val trans = TransitionDrawable(color)
+        layout.background = trans
         trans.startTransition(300)
     }
 
     private fun logResponse(response: String?) {
-        Log.d("RESPONSE", "Response is: " + response)
+        Log.d("RESPONSE", "Response is: $response")
     }
 
     private fun setStatus() {
-        if (statusValue.equals("on")) {
-            textView_status.text = ""
-            button.setImageResource(R.drawable.button_off)
+        when {
+            statusValue.equals("on") -> {
+                textView_status.text = ""
+                button.setImageResource(R.drawable.button_off)
 
-        } else if (statusValue.equals("off")) {
-            textView_status.text = ""
-            button.setImageResource(R.drawable.button_on)
-        } else if (statusValue.equals("error 401")) {
-            textView_status.text = "Authorization failed, check cridentials"
-        } else if (statusValue.equals("error 501")) {
-            textView_status.text = "Sonoff is not responding..."
-
-
+            }
+            statusValue.equals("off") -> {
+                textView_status.text = ""
+                button.setImageResource(R.drawable.button_on)
+            }
+            statusValue.equals("error 401") -> textView_status.text = "Authorization failed, check cridentials"
+            statusValue.equals("error 501") -> textView_status.text = "Sonoff is not responding..."
         }
+    }
+
+    private fun updateUrls() {
+        toggleUrl = "http://192.168.0.100:8082/toggle?sw=$selectedSwitch"
+        statusUrl = "http://192.168.0.100:8082/status?sw=$selectedSwitch"
     }
 }
